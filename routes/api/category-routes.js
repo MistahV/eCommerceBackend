@@ -4,71 +4,64 @@ const { Category, Product } = require('../../models');
 // The `/api/categories` endpoint
 
 router.get('/', (req, res) => {
-  const categoryData = Category.findAll().catch((err) => {
-    res.json(err);
+    Category.findAll(
+    {
+      include: [Product]
+    }
+  ).then((categories) => res.json(categories))
+   .catch((err) => {
+    res.status(400).json(err);
   });
-  res.json(categoryData);
-  // find all categories
-  // be sure to include its associated Products
 });
 
 router.get('/:id', (req, res) => {
-  const oneCategory = Category.findOne(
+   Category.findOne(
     {
       where: {
           id: req.params.id
       },
+      include: [Product]
     }
-  ).catch((err) => {
-    res.json(err);
+  ).then((category) => res.json(category))
+  .catch((err) => {
+    res.status(400).json(err);
   });
-  res.json(oneCategory);
-  // find one category by its `id` value
-  // be sure to include its associated Products
 });
 
 router.post('/', (req, res) => {
-  try {
-    const newCategory = Category.create(req.body);
-    res.status(200).json(newCategory);
-  } catch (err) {
-    res.status(400).json(newCategory);
-  }
-  // create a new category
+    Category.create(req.body)
+    .then((newCategory) => res.status(200).json(newCategory))
+    .catch((err) => {
+      res.status(400).json(err);
+    });
 });
 
 router.put('/:id', (req, res) => {
-  try {
-    const updatedCategory = Category.update(
-    {
-      id: req.body.id,
-      category_name: req.body.category_name,
-    },
+    Category.update(
+    req.body,
     {
       where: {
          id: req.params.id
       },
+    }).then((updatedCategory) => res.status(200).json(updatedCategory))
+    .catch((err) => {
+      res.status(400).json(err);
     });
-    res.status(200).json(updatedCategory);
-  } catch (err) {
-    res.status(400).json(updatedCategory)
-  }
-  // update a category by its `id` value
 });
 
 router.delete('/:id', (req, res) => {
-  try {
-    const deletedCategory = Category.destroy(
+   Category.destroy(
     {
       where: {
          id: req.params.id
       },
+    })
+    .then((deletedCategory) => res.status(200).json(deletedCategory))
+    .catch((err) => {
+      res.status(400).json(err);
     });
-    res.status(200).json(deletedCategory);
-  } catch (err) {
-    res.status(400).json(deletdCategory)
-  }
-  // delete a category by its `id` value
 });
+
+
 
 module.exports = router;
